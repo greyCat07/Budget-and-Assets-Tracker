@@ -1,0 +1,7 @@
+{
+  "name": "Budget & Asset Tracker",
+  "description": "Cross-platform personal finance management app with semi-monthly budgeting, asset tracking, bank sync, scheduled bill calendar, live stocks & crypto, biometric security, CSV export, and AI spending insights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

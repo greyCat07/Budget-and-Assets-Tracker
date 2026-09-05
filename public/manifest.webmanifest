@@ -1,0 +1,18 @@
+{
+  "name": "Vault Finance & Asset Tracker",
+  "short_name": "Vault",
+  "description": "Cross-platform personal finance, semi-monthly budgeting, and asset tracking.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

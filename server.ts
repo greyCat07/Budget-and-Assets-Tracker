@@ -306,37 +306,66 @@ Give a concise, empowering, and mathematically sound financial answer (maximum 1
     }
   });
 
-  // Open Banking / Plaid Sync simulation endpoint
+  // Open Banking / Plaid & Web3 Wallet Sync simulation endpoint
   app.post("/api/bank/sync", (req, res) => {
     const { institutionId, accountId } = req.body;
-    // Simulate fetching fresh cleared transactions from bank webhook
     const today = new Date().toISOString().split("T")[0];
-    const syncedTransactions = [
-      {
-        id: `tx-sync-${Date.now()}-1`,
-        title: "Trader Joe's Market",
-        amount: 64.32,
-        type: "expense",
-        category: "Groceries",
-        date: today,
-        accountId: accountId || "acc-chase-chk",
-        merchant: "Trader Joe's",
-        source: "Bank Sync",
-        status: "cleared"
-      },
-      {
-        id: `tx-sync-${Date.now()}-2`,
-        title: "Shell Fuel Station",
-        amount: 42.15,
-        type: "expense",
-        category: "Transportation",
-        date: today,
-        accountId: accountId || "acc-chase-chk",
-        merchant: "Shell Oil",
-        source: "Bank Sync",
-        status: "cleared"
-      }
-    ];
+
+    const isCrypto = institutionId && (institutionId.toLowerCase().includes("metamask") || institutionId.toLowerCase().includes("coinbase"));
+
+    const syncedTransactions = isCrypto
+      ? [
+          {
+            id: `tx-sync-${Date.now()}-1`,
+            title: "Uniswap v3 Liquidity Yield",
+            amount: 145.20,
+            type: "income",
+            category: "Investments",
+            date: today,
+            accountId: accountId || "acc-crypto-ledger",
+            merchant: "Uniswap Protocol",
+            source: "Web3 Sync",
+            status: "cleared"
+          },
+          {
+            id: `tx-sync-${Date.now()}-2`,
+            title: "Ethereum Network Gas Fee",
+            amount: 4.85,
+            type: "expense",
+            category: "Fees",
+            date: today,
+            accountId: accountId || "acc-crypto-ledger",
+            merchant: "Ethereum Network",
+            source: "Web3 Sync",
+            status: "cleared"
+          }
+        ]
+      : [
+          {
+            id: `tx-sync-${Date.now()}-1`,
+            title: "Trader Joe's Market",
+            amount: 64.32,
+            type: "expense",
+            category: "Groceries",
+            date: today,
+            accountId: accountId || "acc-chase-chk",
+            merchant: "Trader Joe's",
+            source: "Bank Sync",
+            status: "cleared"
+          },
+          {
+            id: `tx-sync-${Date.now()}-2`,
+            title: "Shell Fuel Station",
+            amount: 42.15,
+            type: "expense",
+            category: "Transportation",
+            date: today,
+            accountId: accountId || "acc-chase-chk",
+            merchant: "Shell Oil",
+            source: "Bank Sync",
+            status: "cleared"
+          }
+        ];
 
     res.json({
       success: true,

@@ -42,6 +42,7 @@ export const AddAssetModal: React.FC<AddAssetModalProps> = ({ isOpen, onClose })
       currentValue: val,
       costBasis: basis,
       quantity: quantity ? parseFloat(quantity) : undefined,
+      currency: 'USD',
     });
 
     setName('');

@@ -18,7 +18,10 @@ import {
   CheckCircle2,
   KeyRound,
   RotateCcw,
-  Check
+  Check,
+  Laptop,
+  Terminal,
+  Copy
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 
@@ -66,12 +69,8 @@ export const SettingsAndBackupModal: React.FC<SettingsAndBackupModalProps> = ({
       disableBiometrics();
       setFeedbackMsg('Biometric authentication disabled.');
     } else {
-      const ok = await enableBiometrics();
-      if (ok) {
-        setFeedbackMsg('Biometric authentication enabled!');
-      } else {
-        setFeedbackMsg('Biometrics configured with PIN security.');
-      }
+      await enableBiometrics();
+      setFeedbackMsg('Biometric authentication enabled!');
     }
   };
 
@@ -394,6 +393,46 @@ export const SettingsAndBackupModal: React.FC<SettingsAndBackupModalProps> = ({
               <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
               <span>{mobileFrameMode === 'mobile' ? 'Mobile App Frame' : 'Full Width'}</span>
             </button>
+          </div>
+        </div>
+
+        {/* Mobile & Desktop Application Packaging Hub */}
+        <div className="p-4 bg-neutral-850/70 border border-neutral-800 rounded-2xl space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Laptop className="w-4 h-4 text-emerald-400" />
+              <h4 className="text-xs font-bold text-neutral-200 uppercase tracking-wider">
+                Mobile & Desktop Packaging
+              </h4>
+            </div>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              Ready
+            </span>
+          </div>
+          <p className="text-[11px] text-neutral-400 leading-relaxed">
+            This repository is configured with Capacitor (<span className="text-neutral-200 font-mono">capacitor.config.json</span>) for Android/iOS and Electron (<span className="text-neutral-200 font-mono">electron/main.cjs</span>) for Windows/macOS/Linux.
+          </p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-xl space-y-1">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-200">
+                <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Mobile (APK / iOS)</span>
+              </div>
+              <p className="text-[10px] text-neutral-400">
+                Run <code className="text-emerald-400 font-mono">npm run build:mobile</code> then <code className="text-neutral-200 font-mono">npm run cap:android</code>
+              </p>
+            </div>
+
+            <div className="p-2.5 bg-neutral-900/90 border border-neutral-800 rounded-xl space-y-1">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-200">
+                <Laptop className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Desktop (.exe / .dmg)</span>
+              </div>
+              <p className="text-[10px] text-neutral-400">
+                Run <code className="text-indigo-400 font-mono">npm run electron:start</code> or package with electron-builder
+              </p>
+            </div>
           </div>
         </div>
 

@@ -88,7 +88,9 @@ interface FinanceContextType {
   addNotification: (notif: Omit<NotificationAlert, 'id' | 'timestamp' | 'read'>) => void;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsRead: () => void;
+  markAllNotificationsAsRead: () => void;
   clearNotification: (id: string) => void;
+  clearAllNotifications: () => void;
   updateAlertSettings: (updates: Partial<AlertSettings>) => void;
 
   // Biometrics & Security
@@ -96,7 +98,10 @@ interface FinanceContextType {
   unlockWithPin: (enteredPin: string) => boolean;
   lockApp: () => void;
   toggleBiometricsEnabled: (enabled: boolean) => void;
+  enableBiometrics: () => void;
+  disableBiometrics: () => void;
   updatePinCode: (newPin: string) => void;
+  setPin: (newPin: string) => void;
   togglePrivacyMode: () => void;
   updateAutoLockTimeout: (minutes: number) => void;
 
@@ -105,7 +110,10 @@ interface FinanceContextType {
   triggerCloudBackup: () => Promise<boolean>;
   restoreCloudBackup: () => Promise<boolean>;
   exportJsonBackup: () => void;
+  exportLocalJson: () => void;
   importJsonBackup: (jsonString: string) => boolean;
+  importLocalJson: (jsonString: string) => boolean;
+  resetToDefaultData: () => void;
   refreshMarketQuotes: () => Promise<void>;
   refreshAiInsights: () => Promise<void>;
   askAiAdvisor: (question: string) => Promise<string>;
@@ -744,9 +752,33 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setTransactions((prev) => [...data.newTransactions, ...prev]);
       }
 
-      setAccounts((prev) =>
-        prev.map((a) => ({ ...a, lastSynced: 'Just now', isConnected: true }))
-      );
+      if (institutionName && institutionName.toLowerCase().includes('metamask')) {
+        setAccounts((prev) => {
+          const exists = prev.some((a) => a.name.toLowerCase().includes('metamask'));
+          if (!exists) {
+            return [
+              {
+                id: `acc-metamask-${Date.now()}`,
+                name: 'MetaMask Web3 Wallet',
+                type: 'crypto_wallet' as const,
+                balance: 5240.80,
+                currency: 'USD',
+                institution: 'MetaMask',
+                accountNumberMask: '...b49A',
+                color: '#F6851B',
+                lastSynced: 'Just now',
+                isConnected: true,
+              },
+              ...prev.map((a) => ({ ...a, lastSynced: 'Just now', isConnected: true })),
+            ];
+          }
+          return prev.map((a) => ({ ...a, lastSynced: 'Just now', isConnected: true }));
+        });
+      } else {
+        setAccounts((prev) =>
+          prev.map((a) => ({ ...a, lastSynced: 'Just now', isConnected: true }))
+        );
+      }
 
       setSyncState((prev) => ({
         ...prev,
@@ -755,7 +787,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }));
 
       addNotification({
-        title: 'Open Banking Synced',
+        title: data.institution?.toLowerCase().includes('metamask') ? 'MetaMask Wallet Synced' : 'Open Banking Synced',
         message: `Successfully synchronized ${data.syncedCount} new transactions from ${data.institution}.`,
         type: 'sync_update',
         priority: 'low',
@@ -1004,6 +1036,43 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     downloadCsvFile(`Assets_Portfolio_Report_${new Date().toISOString().split('T')[0]}.csv`, csv);
   };
 
+  const markAllNotificationsAsRead = () => markAllNotificationsRead();
+  const clearAllNotifications = () => setNotifications([]);
+  const enableBiometrics = async (): Promise<boolean> => {
+    toggleBiometricsEnabled(true);
+    return true;
+  };
+  const disableBiometrics = () => toggleBiometricsEnabled(false);
+  const setPin = (pin: string) => updatePinCode(pin);
+  const exportLocalJson = () => exportJsonBackup();
+  const importLocalJson = (jsonStr: string) => importJsonBackup(jsonStr);
+  const resetToDefaultData = () => {
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_txs`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_accounts`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_assets`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_liabilities`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_budgets`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_bills`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_notifs`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_alert_settings`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_biometrics`);
+    setTransactions(INITIAL_TRANSACTIONS);
+    setAccounts(INITIAL_ACCOUNTS);
+    setAssets(INITIAL_ASSETS);
+    setLiabilities(INITIAL_LIABILITIES);
+    setCategoryBudgets(INITIAL_CATEGORY_BUDGETS);
+    setScheduledBills(INITIAL_SCHEDULED_BILLS);
+    setNotifications(INITIAL_NOTIFICATIONS);
+    setAlertSettings(INITIAL_ALERT_SETTINGS);
+    setBiometricState(INITIAL_BIOMETRIC_STATE);
+    addNotification({
+      title: 'Reset Complete',
+      message: 'All application data has been restored to clean defaults.',
+      type: 'security',
+      priority: 'low',
+    });
+  };
+
   return (
     <FinanceContext.Provider
       value={{
@@ -1046,20 +1115,28 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addNotification,
         markNotificationAsRead,
         markAllNotificationsRead,
+        markAllNotificationsAsRead,
         clearNotification,
+        clearAllNotifications,
         updateAlertSettings,
         unlockWithBiometrics,
         unlockWithPin,
         lockApp,
         toggleBiometricsEnabled,
+        enableBiometrics,
+        disableBiometrics,
         updatePinCode,
+        setPin,
         togglePrivacyMode,
         updateAutoLockTimeout,
         syncBankAccounts,
         triggerCloudBackup,
         restoreCloudBackup,
         exportJsonBackup,
+        exportLocalJson,
         importJsonBackup,
+        importLocalJson,
+        resetToDefaultData,
         refreshMarketQuotes,
         refreshAiInsights,
         askAiAdvisor,

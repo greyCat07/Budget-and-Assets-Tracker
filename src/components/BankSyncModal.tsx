@@ -25,9 +25,13 @@ export const BankSyncModal: React.FC<BankSyncModalProps> = ({ isOpen, onClose })
   const [step, setStep] = useState<'select' | 'auth' | 'syncing' | 'success'>('select');
   const [username, setUsername] = useState('alex.morgan');
   const [password, setPassword] = useState('••••••••••••');
+  const [walletAddress, setWalletAddress] = useState('0x71C...b49A');
+  const [isConnectingMetaMask, setIsConnectingMetaMask] = useState(false);
+  const [walletNotice, setWalletNotice] = useState<string | null>(null);
 
   const institutions = [
     { id: 'chase', name: 'Chase Bank', logo: '🏛️', color: '#117ACA' },
+    { id: 'metamask', name: 'MetaMask Wallet', logo: '🦊', color: '#F6851B' },
     { id: 'bofa', name: 'Bank of America', logo: '🏦', color: '#E31837' },
     { id: 'fidelity', name: 'Fidelity Investments', logo: '📈', color: '#3A7D44' },
     { id: 'coinbase', name: 'Coinbase Exchange', logo: '🪙', color: '#0052FF' },
@@ -37,14 +41,44 @@ export const BankSyncModal: React.FC<BankSyncModalProps> = ({ isOpen, onClose })
     { id: 'vanguard', name: 'Vanguard', logo: '⛵', color: '#971B2F' },
   ];
 
+  const isMetaMask = selectedBank === 'MetaMask Wallet';
+
   const handleStartAuth = (bankName: string) => {
     setSelectedBank(bankName);
+    setWalletNotice(null);
     setStep('auth');
+  };
+
+  const handleConnectMetaMask = async () => {
+    setIsConnectingMetaMask(true);
+    setWalletNotice(null);
+    try {
+      if (typeof window !== 'undefined' && (window as any).ethereum) {
+        const eth = (window as any).ethereum;
+        // Request accounts safely
+        const accounts = await eth.request({ method: 'eth_requestAccounts' });
+        if (accounts && accounts.length > 0) {
+          setWalletAddress(accounts[0]);
+          setWalletNotice(`Connected to MetaMask account: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`);
+          setIsConnectingMetaMask(false);
+          return;
+        }
+      }
+      // If not present in iframe or sandboxed
+      setWalletAddress('0x71C...b49A');
+      setWalletNotice('MetaMask extension not reachable in this sandboxed window. Linked public address for portfolio read.');
+    } catch (err: any) {
+      console.warn('Handled MetaMask connection attempt:', err?.message || err);
+      setWalletAddress('0x71C...b49A');
+      setWalletNotice('Handshake was cancelled or restricted. Defaulted to read-only wallet sync.');
+    } finally {
+      setIsConnectingMetaMask(false);
+    }
   };
 
   const handleConnect = async () => {
     setStep('syncing');
-    await syncBankAccounts();
+    await syncBankAccounts(selectedBank || 'Chase Bank');
     setStep('success');
   };
 
@@ -117,35 +151,82 @@ export const BankSyncModal: React.FC<BankSyncModalProps> = ({ isOpen, onClose })
         {step === 'auth' && (
           <div className="space-y-4">
             <div className="text-center space-y-1">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-2">
-                <Lock className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-2 text-2xl">
+                {isMetaMask ? '🦊' : <Lock className="w-6 h-6" />}
               </div>
               <h3 className="text-base font-bold text-neutral-100">
-                Authenticate with {selectedBank}
+                {isMetaMask ? 'Connect MetaMask Web3 Wallet' : `Authenticate with ${selectedBank}`}
               </h3>
-              <p className="text-xs text-neutral-400">Enter your credentials to link accounts</p>
+              <p className="text-xs text-neutral-400">
+                {isMetaMask
+                  ? 'Connect browser extension or sync public Ethereum address'
+                  : 'Enter your credentials to link accounts'}
+              </p>
             </div>
 
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-semibold text-neutral-300 block mb-1">User ID / Username</label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-neutral-100 focus:outline-none focus:border-emerald-500"
-                />
+            {isMetaMask ? (
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleConnectMetaMask}
+                  disabled={isConnectingMetaMask}
+                  className="w-full py-2.5 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-750 border border-neutral-700 hover:border-amber-500/50 text-xs font-semibold text-neutral-200 flex items-center justify-center gap-2 transition-all"
+                >
+                  <span className="text-base">🦊</span>
+                  <span>{isConnectingMetaMask ? 'Connecting to MetaMask...' : 'Connect MetaMask Browser Extension'}</span>
+                </button>
+
+                {walletNotice && (
+                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 leading-snug">
+                    {walletNotice}
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-xs font-semibold text-neutral-300 block mb-1">
+                    Public Wallet / ENS Address
+                  </label>
+                  <input
+                    type="text"
+                    value={walletAddress}
+                    onChange={(e) => setWalletAddress(e.target.value)}
+                    placeholder="0x..."
+                    className="w-full px-3.5 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-neutral-100 font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                  <div className="flex justify-between items-center mt-1 text-[10px] text-neutral-400">
+                    <span>Read-only on-chain tracking</span>
+                    <button
+                      type="button"
+                      onClick={() => setWalletAddress('0x71C...b49A')}
+                      className="text-emerald-400 hover:underline"
+                    >
+                      Use Demo Address
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-neutral-300 block mb-1">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-neutral-100 focus:outline-none focus:border-emerald-500"
-                />
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-neutral-300 block mb-1">User ID / Username</label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-neutral-100 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-neutral-300 block mb-1">Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-neutral-100 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex gap-2 pt-2">
               <button
@@ -159,7 +240,7 @@ export const BankSyncModal: React.FC<BankSyncModalProps> = ({ isOpen, onClose })
                 onClick={handleConnect}
                 className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all"
               >
-                Authorize & Link
+                {isMetaMask ? 'Link & Track Wallet' : 'Authorize & Link'}
               </button>
             </div>
           </div>

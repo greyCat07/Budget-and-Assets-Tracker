@@ -35,6 +35,13 @@ export const AddBillModal: React.FC<AddBillModalProps> = ({ isOpen, onClose }) =
     const parsedAmount = parseFloat(amount);
     if (!title.trim() || isNaN(parsedAmount) || parsedAmount <= 0) return;
 
+    const today = new Date();
+    const targetDate = new Date(today.getFullYear(), today.getMonth(), Number(dueDay));
+    if (targetDate < today) {
+      targetDate.setMonth(targetDate.getMonth() + 1);
+    }
+    const nextDueDate = targetDate.toISOString().split('T')[0];
+
     addScheduledBill({
       title: title.trim(),
       amount: parsedAmount,
@@ -45,6 +52,7 @@ export const AddBillModal: React.FC<AddBillModalProps> = ({ isOpen, onClose }) =
       reminderDaysBefore: Number(reminderDaysBefore),
       accountId,
       isPaid: false,
+      nextDueDate,
     });
 
     setTitle('');

@@ -208,8 +208,17 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
 
   const [marketQuotes, setMarketQuotes] = useState<{ stocks: MarketQuote[]; cryptos: MarketQuote[] }>({
-    stocks: [],
-    cryptos: [],
+    stocks: [
+      { symbol: 'AAPL', name: 'Apple Inc.', price: 228.45, change24h: 1.42, changePercent: 0.63, marketCap: '3.48T', sparkline: [225.1, 226.3, 225.8, 227.2, 226.9, 228.1, 228.45], type: 'stock' },
+      { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 128.90, change24h: 3.85, changePercent: 3.08, marketCap: '3.17T', sparkline: [124.5, 125.2, 126.8, 126.0, 127.4, 128.0, 128.90], type: 'stock' },
+      { symbol: 'MSFT', name: 'Microsoft Corp.', price: 446.75, change24h: -1.20, changePercent: -0.27, marketCap: '3.32T', sparkline: [449.0, 448.2, 447.5, 446.9, 447.1, 446.5, 446.75], type: 'stock' },
+      { symbol: 'VOO', name: 'Vanguard S&P 500 ETF', price: 512.30, change24h: 2.15, changePercent: 0.42, marketCap: '1.18T', sparkline: [509.2, 510.5, 510.8, 511.4, 511.9, 512.0, 512.30], type: 'etf' },
+    ],
+    cryptos: [
+      { symbol: 'BTC', name: 'Bitcoin', price: 64120.0, change24h: 1450.0, changePercent: 2.31, marketCap: '1.26T', sparkline: [62400, 62800, 63100, 63500, 63200, 63900, 64120], type: 'crypto' },
+      { symbol: 'ETH', name: 'Ethereum', price: 3485.5, change24h: -42.5, changePercent: -1.20, marketCap: '419B', sparkline: [3540, 3530, 3515, 3500, 3490, 3480, 3485.5], type: 'crypto' },
+      { symbol: 'SOL', name: 'Solana', price: 154.2, change24h: 6.8, changePercent: 4.61, marketCap: '71.5B', sparkline: [146.5, 147.2, 149.0, 150.4, 152.1, 153.0, 154.2], type: 'crypto' },
+    ],
   });
 
   const [aiInsights, setAiInsights] = useState<AIInsightsData>({

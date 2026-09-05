@@ -2,54 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <script>
-      // Global defensive guard for external browser extensions (MetaMask, Phantom, Web3 wallets)
-      // Prevents unhandled extension injection rejections in sandboxed iframes from bubbling up
-      (function() {
-        function isExtensionError(err) {
-          if (!err) return false;
-          var str = (typeof err === 'string' ? err : (err.message || err.stack || String(err))).toLowerCase();
-          return (
-            str.includes('metamask') ||
-            str.includes('failed to connect to metamask') ||
-            str.includes('ethereum') ||
-            str.includes('chrome-extension://') ||
-            str.includes('moz-extension://') ||
-            str.includes('safari-extension://') ||
-            str.includes('evm provider')
-          );
-        }
-
-        window.addEventListener('unhandledrejection', function(event) {
-          if (isExtensionError(event.reason)) {
-            console.warn('[Extension Guard] Handled browser extension rejection:', event.reason);
-            event.preventDefault();
-            if (typeof event.stopImmediatePropagation === 'function') {
-              event.stopImmediatePropagation();
-            }
-          }
-        }, true);
-
-        window.addEventListener('error', function(event) {
-          if (isExtensionError(event.message) || isExtensionError(event.error) || (event.filename && isExtensionError(event.filename))) {
-            console.warn('[Extension Guard] Handled browser extension error:', event.message);
-            event.preventDefault();
-            if (typeof event.stopImmediatePropagation === 'function') {
-              event.stopImmediatePropagation();
-            }
-          }
-        }, true);
-      })();
-    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#0a0a0a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Vault" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="apple-touch-icon" href="/icon.svg" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="manifest" href="./manifest.webmanifest" />
     <title>Budget & Asset Tracker</title>
     <meta name="description" content="Cross-platform personal finance management app with semi-monthly budgeting, asset tracking, bank sync, scheduled bill calendar, live stocks & crypto, biometric security, CSV export, and AI spending insights." />
     <meta property="og:title" content="Budget & Asset Tracker" />
@@ -62,7 +23,7 @@
   </head>
   <body class="bg-neutral-950 text-neutral-100 antialiased selection:bg-emerald-500 selection:text-white">
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
 

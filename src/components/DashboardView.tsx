@@ -22,7 +22,8 @@ import {
   Flame,
   CreditCard,
   Layers,
-  DollarSign
+  DollarSign,
+  Settings
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 
@@ -31,6 +32,7 @@ interface DashboardViewProps {
   onOpenBankSync: () => void;
   onOpenAddBill: () => void;
   onOpenAdvisorChat: () => void;
+  onOpenSettings?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -38,6 +40,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenBankSync,
   onOpenAddBill,
   onOpenAdvisorChat,
+  onOpenSettings,
 }) => {
   const {
     netWorth,
@@ -88,6 +91,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {onOpenSettings && (
+            <button
+              id="btn-dashboard-settings"
+              onClick={onOpenSettings}
+              title="Settings & Data Reset"
+              className="p-2 rounded-xl bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700/60 text-neutral-300 hover:text-white transition-all"
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </button>
+          )}
           <button
             id="btn-desktop-sync"
             onClick={handleSyncAll}

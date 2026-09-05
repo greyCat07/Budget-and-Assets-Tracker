@@ -21,7 +21,10 @@ import {
   Check,
   Laptop,
   Terminal,
-  Copy
+  Copy,
+  Trash2,
+  AlertTriangle,
+  Sparkles
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 
@@ -48,6 +51,7 @@ export const SettingsAndBackupModal: React.FC<SettingsAndBackupModalProps> = ({
     exportLocalJson,
     importLocalJson,
     resetToDefaultData,
+    clearAllData,
     currency,
     setCurrency,
     darkMode,
@@ -61,6 +65,7 @@ export const SettingsAndBackupModal: React.FC<SettingsAndBackupModalProps> = ({
   const [backupLoading, setBackupLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
+  const [confirmAction, setConfirmAction] = useState<'none' | 'demo' | 'clear'>('none');
 
   if (!isOpen) return null;
 
@@ -436,19 +441,121 @@ export const SettingsAndBackupModal: React.FC<SettingsAndBackupModalProps> = ({
           </div>
         </div>
 
-        {/* Reset Database */}
-        <div className="pt-2 text-center">
-          <button
-            onClick={() => {
-              if (confirm('Reset all financial records back to seed data?')) {
-                resetToDefaultData();
-                setFeedbackMsg('Application reset to factory defaults.');
-              }
-            }}
-            className="text-[11px] text-rose-400 hover:text-rose-300 font-medium underline underline-offset-4"
-          >
-            Reset Sandbox State to Defaults
-          </button>
+        {/* Data Reset & Management Hub */}
+        <div className="p-4 bg-neutral-900/90 border border-neutral-800 rounded-2xl space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <RotateCcw className="w-4 h-4 text-rose-400" />
+              <h4 className="text-xs font-bold text-neutral-200 uppercase tracking-wider">
+                Data Reset & Clean Slate
+              </h4>
+            </div>
+          </div>
+          <p className="text-[11px] text-neutral-400 leading-relaxed">
+            Manage your application records. Choose a clean slate to begin entering your own personal finances, or restore the demo sandbox dataset at any time.
+          </p>
+
+          {confirmAction === 'clear' && (
+            <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl space-y-2.5">
+              <div className="flex items-start gap-2.5 text-rose-400">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-bold">Clear All Financial Records?</p>
+                  <p className="text-[11px] text-neutral-300 mt-0.5">
+                    This will remove all sample transactions, custom assets, debts, and bills to zero ($0.00) so you can track your own personal finances from scratch.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => setConfirmAction('none')}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearAllData();
+                    setConfirmAction('none');
+                    setFeedbackMsg('All records cleared! Ready for your personal finances.');
+                    setTimeout(() => setFeedbackMsg(''), 4000);
+                  }}
+                  className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-900/40 transition-all"
+                >
+                  Yes, Clear Everything
+                </button>
+              </div>
+            </div>
+          )}
+
+          {confirmAction === 'demo' && (
+            <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2.5">
+              <div className="flex items-start gap-2.5 text-amber-400">
+                <RotateCcw className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-bold">Restore Demo Sandbox Data?</p>
+                  <p className="text-[11px] text-neutral-300 mt-0.5">
+                    This will restore the sample dataset with pre-populated bank accounts, stock & crypto portfolios, sample transactions, and semi-monthly budgets.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => setConfirmAction('none')}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetToDefaultData();
+                    setConfirmAction('none');
+                    setFeedbackMsg('Sandbox demo data restored successfully.');
+                    setTimeout(() => setFeedbackMsg(''), 4000);
+                  }}
+                  className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 shadow-sm transition-all"
+                >
+                  Yes, Restore Demo Data
+                </button>
+              </div>
+            </div>
+          )}
+
+          {confirmAction === 'none' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmAction('clear')}
+                className="p-3 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/25 rounded-xl text-left transition-all group"
+              >
+                <div className="flex items-center gap-1.5 text-xs font-bold text-rose-400 mb-0.5">
+                  <Trash2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                  <span>Clear All Records ($0.00)</span>
+                </div>
+                <p className="text-[10px] text-neutral-400">
+                  Wipe all demo transactions & balances for a fresh personal start.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setConfirmAction('demo')}
+                className="p-3 bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700/80 rounded-xl text-left transition-all group"
+              >
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400 mb-0.5">
+                  <RotateCcw className="w-3.5 h-3.5 group-hover:-rotate-90 transition-transform" />
+                  <span>Restore Demo Portfolio</span>
+                </div>
+                <p className="text-[10px] text-neutral-400">
+                  Reload sample stocks, crypto, mortgage, and budget templates.
+                </p>
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>

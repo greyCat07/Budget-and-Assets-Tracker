@@ -82,6 +82,7 @@ const MainAppContent: React.FC = () => {
               onOpenBankSync={() => setIsBankSyncOpen(true)}
               onOpenAddBill={() => setIsAddBillOpen(true)}
               onOpenAdvisorChat={() => {}}
+              onOpenSettings={() => setIsSettingsOpen(true)}
             />
           )}
           {activeTab === 'budget' && <SemiMonthlyBudgetView />}

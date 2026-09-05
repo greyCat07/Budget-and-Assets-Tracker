@@ -114,6 +114,7 @@ interface FinanceContextType {
   importJsonBackup: (jsonString: string) => boolean;
   importLocalJson: (jsonString: string) => boolean;
   resetToDefaultData: () => void;
+  clearAllData: () => void;
   refreshMarketQuotes: () => Promise<void>;
   refreshAiInsights: () => Promise<void>;
   askAiAdvisor: (question: string) => Promise<string>;
@@ -1075,11 +1076,85 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setAlertSettings(INITIAL_ALERT_SETTINGS);
     setBiometricState(INITIAL_BIOMETRIC_STATE);
     addNotification({
-      title: 'Reset Complete',
-      message: 'All application data has been restored to clean defaults.',
+      title: 'Demo Data Restored',
+      message: 'All application records have been restored to sample demo portfolio.',
       type: 'security',
       priority: 'low',
     });
+  };
+
+  const clearAllData = () => {
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_txs`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_accounts`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_assets`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_liabilities`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_budgets`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_bills`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_notifs`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_alert_settings`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_biometrics`);
+
+    const cleanDefaultAccounts: Account[] = [
+      {
+        id: 'acc-primary-chk',
+        name: 'Primary Checking',
+        institution: 'My Bank',
+        type: 'checking',
+        balance: 0,
+        currency: 'USD',
+        accountNumberMask: '•••• 0001',
+        lastSynced: 'Just now',
+        isConnected: false,
+        color: '#0A84FF',
+      },
+      {
+        id: 'acc-primary-sav',
+        name: 'Primary Savings',
+        institution: 'My Bank',
+        type: 'savings',
+        balance: 0,
+        currency: 'USD',
+        accountNumberMask: '•••• 0002',
+        lastSynced: 'Just now',
+        isConnected: false,
+        color: '#30D158',
+      },
+    ];
+
+    const cleanBudgets: CategoryBudget[] = [
+      { category: 'Housing & Rent', period1Limit: 500, period2Limit: 500, color: '#0A84FF', iconName: 'Home' },
+      { category: 'Groceries & Food', period1Limit: 250, period2Limit: 250, color: '#30D158', iconName: 'ShoppingBag' },
+      { category: 'Dining & Takeout', period1Limit: 150, period2Limit: 150, color: '#FF9F0A', iconName: 'UtensilsCrossed' },
+      { category: 'Transportation', period1Limit: 120, period2Limit: 120, color: '#64D2FF', iconName: 'Car' },
+      { category: 'Utilities & Bills', period1Limit: 100, period2Limit: 100, color: '#BF5AF2', iconName: 'Zap' },
+    ];
+
+    setTransactions([]);
+    setAccounts(cleanDefaultAccounts);
+    setAssets([]);
+    setLiabilities([]);
+    setCategoryBudgets(cleanBudgets);
+    setScheduledBills([]);
+    setNotifications([
+      {
+        id: 'notif-fresh-start',
+        title: 'Fresh Start Activated',
+        message: 'All records have been cleared. Ready to track your personal finances.',
+        timestamp: 'Just now',
+        type: 'security',
+        read: false,
+        priority: 'medium',
+      },
+    ]);
+    setAlertSettings(INITIAL_ALERT_SETTINGS);
+    setBiometricState(INITIAL_BIOMETRIC_STATE);
+
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_txs`, JSON.stringify([]));
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_accounts`, JSON.stringify(cleanDefaultAccounts));
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_assets`, JSON.stringify([]));
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_liabilities`, JSON.stringify([]));
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_budgets`, JSON.stringify(cleanBudgets));
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_bills`, JSON.stringify([]));
   };
 
   return (
@@ -1146,6 +1221,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         importJsonBackup,
         importLocalJson,
         resetToDefaultData,
+        clearAllData,
         refreshMarketQuotes,
         refreshAiInsights,
         askAiAdvisor,
